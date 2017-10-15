@@ -1,11 +1,13 @@
 function SlidingPuzzle()
 {
 	this.canvas 		= document.getElementById("canvas");
-	this.ctx			= canvas.getContext("2d");
-	this.canvasWidth 	= 700;
-	this.canvasHeight 	= 600;
-	this.shuffleCount   = 1500; //Pseudo-random shuffles
+	this.ctx 			= canvas.getContext("2d");
+	this.canvasWidth	= 700;
+	this.canvasHeight	= 600;
+	this.shuffleCount	= 2000; //Pseudo-random shuffles
 	this.gameWon		= false;
+	this.startTime		= null;
+	this.endTime		= null;
 
 	this.board = [
 		[1,5,9,13],
@@ -22,7 +24,7 @@ SlidingPuzzle.prototype.initCanvas = function()
 	var self = this;
 	this.canvas.width 	= this.canvasWidth;
 	this.canvas.height 	= this.canvasHeight;
-	this.ctx.fillStyle = "#FFFFFF";
+	this.ctx.fillStyle  = "#FFFFFF";
 	this.ctx.fillRect(0,0,this.canvasWidth,this.canvasHeight);
 
 	this.shuffleTiles();
@@ -31,6 +33,7 @@ SlidingPuzzle.prototype.initCanvas = function()
 		if(self.gameWon == false)
 			self.handleMouseClicks(evt,self); 
 	},false);
+	this.startTime = performance.now();
 }
 
 SlidingPuzzle.prototype.shuffleTiles = function()
@@ -143,13 +146,20 @@ SlidingPuzzle.prototype.handleMouseClicks = function(evt,self)
 	];
 
 	if(_.isEqual(self.board, finishedBoard))
-	{
+	{	
+		this.canvas.removeEventListener("mousedown", function(evt){});
 		this.ctx.fillStyle = "#FFFFFF";
 		this.ctx.strokeStyle = "#2b2b2b";
 		this.ctx.font="76px Arial";
 		this.ctx.fillText("You Win!",self.canvasWidth/2 - 150,self.canvasHeight/2 + 18);
 		this.ctx.strokeText("You Win!",self.canvasWidth/2 - 150,self.canvasHeight/2 + 18);
 		self.gameWon = true;
+		self.endTime = performance.now();
+		var time = ((self.endTime - self.startTime) / 1000);
+		$("#yourTimes").append('<li>'+ (Math.round(time * 100) / 100)+' seconds</li>');
+		self.startTime		= null;
+		self.endTime		= null;
+		$('#noTimes').remove();
 	}
 }
 
